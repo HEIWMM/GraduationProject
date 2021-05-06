@@ -1,13 +1,16 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { tasks } from './store'
 Vue.use(Vuex)
 const store = new Vuex.Store({
   state: {
-    count: 0,
+    isFocus: false,
+    tasks,
   },
   mutations: {
-    increment: (state) => state.count++,
-    decrement: (state) => state.count--,
+    confirmTask(state){
+      state.isFocus = !state.isFocus
+    }
   },
 })
 export default store

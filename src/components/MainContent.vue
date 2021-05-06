@@ -144,14 +144,14 @@
           <span>计划开始时间：</span>
         </el-col>
         <el-col :span="4">
-          <el-date-picker v-model="value1" type="date" placeholder="选择日期">
+          <el-date-picker v-model="planBegin" type="date" placeholder="选择日期">
           </el-date-picker>
         </el-col>
         <el-col :span="3" :offset="1">
           <span>计划结束时间：</span>
         </el-col>
         <el-col :span="4">
-          <el-date-picker v-model="value1" type="date" placeholder="选择日期">
+          <el-date-picker v-model="planEnd" type="date" placeholder="选择日期">
           </el-date-picker>
         </el-col>
         <el-col :span="3" :offset="1">
@@ -207,25 +207,7 @@ export default {
           ImportantDegree: "8",
           EmergencyDegree: "8",
           status: "已完成",
-        },
-        {
-          task: "任务1",
-          ImportantDegree: "10",
-          EmergencyDegree: "10",
-          status: "待处理",
-        },
-        {
-          task: "任务2",
-          ImportantDegree: "8",
-          EmergencyDegree: "8",
-          status: "已完成",
-        },
-        {
-          task: "任务1",
-          ImportantDegree: "10",
-          EmergencyDegree: "10",
-          status: "待处理",
-        },
+        }
       ],
       textarea: "",
       dialogFormVisible: false,
@@ -245,6 +227,8 @@ export default {
       logContents: "",
       taskType: "",
       importantValue: "",
+      planBegin:"",
+      planEnd:"",
     };
   },
   methods: {
