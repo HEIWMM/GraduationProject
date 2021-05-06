@@ -90,11 +90,14 @@
       </el-row>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" v-if="true" @click="confirmTask">{{
-          "h" + btnStr
-        }}</el-button>
+        <el-button
+          type="primary"
+          v-if="taskType === 'reverse'"
+          @click="confirmTask"
+          >{{ btnStr }}</el-button
+        >
         <el-button type="primary" v-else @click="positiveConfirm">{{
-          "w" + btnStr
+          btnStr
         }}</el-button>
       </div>
     </el-dialog>
@@ -225,6 +228,11 @@ export default {
       console.log(+this.pickBeginTime);
       this.doTask(); // 开始正向计时
       this.changeStatus(); //改变状态
+      console.log("状态：", this.status);
+      if (this.status === 2) {
+        let processTime = +new Date() - (+this.pickBeginTime);
+        console.log("经历的时间：", processTime);
+      }
     },
   },
 };
