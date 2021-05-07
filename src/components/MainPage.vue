@@ -7,7 +7,7 @@
         clearable
         class="taskInput"
       ></el-input>
-      <el-select v-model="typeValue" placeholder="请选择" class="taskType">
+      <el-select v-model="typeValue" placeholder="全部" class="taskType">
         <el-option
           v-for="item in options"
           :key="item.value"
@@ -77,6 +77,7 @@
         </el-col>
       </el-row>
       <el-row>
+        <!-- contentValue -->
         <el-col :span="24">
           <el-input
             type="textarea"
@@ -90,24 +91,18 @@
       </el-row>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          v-if="taskType === 'reverse'"
-          @click="confirmTask"
-          >{{ btnStr }}</el-button
-        >
-        <el-button type="primary" v-else @click="positiveConfirm">{{
-          btnStr
-        }}</el-button>
+        <el-button type="primary" @click="confirmTask">{{ btnStr }}</el-button>
       </div>
     </el-dialog>
   </el-container>
 </template>
 
 <script>
+import moment from "moment";
+
 import MainContent from "./MainContent";
 import MainFooter from "./MainFooter";
-var timer1, timer2;
+var timer1, timer2, timer3;
 export default {
   name: "MainPage",
   components: {
@@ -115,7 +110,7 @@ export default {
     MainFooter,
   },
   mounted() {
-    console.log(this.taskType);
+    console.log("testValue", this.$store.state.tasks[0].importantDegree);
   },
   data() {
     return {
@@ -138,11 +133,26 @@ export default {
       typeValue: "",
       timeCount: 10,
       dialogFormVisible: false,
-      pickBeginTime: new Date(),
+      pickBeginTime: moment(),
       taskType: "reverse",
+      endTime: "",
+      processTime: "",
     };
   },
   methods: {
+    addSubTask() {
+      this.endTime = moment();
+      this.processTime = this.endTime.diff(this.pickBeginTime, "seconds");
+      let subTask = {
+        date: this.pickBeginTime.format("YYYY-M-D"),
+        beginTime: this.pickBeginTime.format("HH:mm:ss"),
+        endTime: this.endTime.format("HH:mm:ss"),
+        minuteCount: this.endTime.diff(this.pickBeginTime, "minutes"),
+        focusOnMatters: this.focusItem,
+        processRecord: this.contentValue,
+      };
+      this.$store.commit("addSubTask", subTask);
+    },
     changeStatus() {
       let str = "开始任务";
       let str2 = "确认";
@@ -175,64 +185,80 @@ export default {
     startTask(type) {
       this.dialogFormVisible = true;
       if (this.status === 0) {
-        this.pickBeginTime = new Date();
+        this.pickBeginTime = moment();
         console.log(type);
         this.taskType = type;
         console.log(this.taskType === "reverse");
       }
-      // if(this.status === 0) {
-
-      // }
     },
     doTask() {
       if (this.taskType === "positive") {
+        console.log("当前状态", this.status);
         console.log("正向计时");
+        if (this.status === 1) {
+          let endTime = moment();
+          let processTime = endTime.diff(this.pickBeginTime, "seconds");
+          timer3 = setTimeout(() => {
+            console.log("开始正向计时的休息时间");
+            this.$nextTick(() => {
+              this.addSubTask();
+              console.log("正向任务结束--经历的时间：", this.processTime);
+              this.changeStatus();
+            });
+          }, (processTime / 5) * 1000); //休息时间
+        }
+        if (this.status === 2) {
+          clearTimeout(timer3);
+          this.addSubTask();
+          console.log("正向任务结束--经历的时间：", this.processTime);
+        }
         return;
       }
-      if (this.status === 0) {
-        console.log("创建反向记时器");
-        timer1 = setTimeout(() => {
-          this.$nextTick(() => {
-            this.changeStatus();
-            timer2 = setTimeout(() => {
+      if (this.taskType === "reverse") {
+        console.log("当前状态", this.status);
+        if (this.status === 0) {
+          console.log("创建反向记时器");
+          timer1 = setTimeout(() => {
+            this.$nextTick(() => {
+              this.changeStatus();
+              timer2 = setTimeout(() => {
+                this.$nextTick(() => {
+                  console.log("反向任务结束--经历的时间：", this.processTime);
+                  this.addSubTask();
+                  this.changeStatus();
+                });
+              }, (this.timeCount / 5) * 60 * 1000); // 休息时间
+            });
+          }, this.timeCount * 60 * 1000); // 专注时间
+        } else {
+          //console.log(timer1, timer2);
+          if (this.status === 1) {
+            let endTime = moment();
+            let processTime = endTime.diff(this.pickBeginTime, "seconds");
+            timer3 = setTimeout(() => {
+              console.log("开始反向计时的休息时间");
               this.$nextTick(() => {
+                this.addSubTask();
+                console.log("反向任务结束--经历的时间：", this.processTime);
                 this.changeStatus();
               });
-            }, (this.timeCount / 5) * 60 * 1000); // 休息时间
-          });
-        }, this.timeCount * 60 * 1000); // 专注时间
-      } else {
-        console.log(timer1, timer2);
-        clearTimeout(timer1);
-        clearTimeout(timer2);
+            }, (processTime / 5) * 1000); //休息时间
+          }
+          if (this.status === 2) {
+            clearTimeout(timer3);
+            this.addSubTask();
+            console.log("反向任务结束--经历的时间：", this.processTime);
+          }
+          clearTimeout(timer1);
+          clearTimeout(timer2);
+        }
       }
     },
     confirmTask() {
       console.log("反向");
-      let task = {
-        focusItem: this.focusItem,
-        contentValue: this.contentValue,
-        pickBeginTime: this.pickBeginTime,
-      };
       this.dialogFormVisible = false;
-      console.log(task);
-      console.log(+this.pickBeginTime);
       this.doTask(); // 开始专注任务
       this.changeStatus(); // 改变状态
-      // this.$store.commit("confirmTask", task);
-    },
-    positiveConfirm() {
-      // 正向计时，
-      console.log("正向");
-      this.dialogFormVisible = false;
-      console.log(+this.pickBeginTime);
-      this.doTask(); // 开始正向计时
-      this.changeStatus(); //改变状态
-      console.log("状态：", this.status);
-      if (this.status === 2) {
-        let processTime = +new Date() - (+this.pickBeginTime);
-        console.log("经历的时间：", processTime);
-      }
     },
   },
 };

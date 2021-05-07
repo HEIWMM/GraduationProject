@@ -1,18 +1,22 @@
 // 新增数据文件
-const subTasksDefault = {
+export const subTasks = [{
   date: '',
   beginTime: '',
   endTime: '',
   minuteCount: 0,
-  focusOnMatters: '',
+  focusOnMatters: '默认任务',
   processRecord: '',
-}
+}]
 export const tasks = [{
-  taskName: '',
+  taskName: '默认任务',
   importantDegree: 0,
   emergencyDegree: 0,
-  status: '',
-  subTasks: [
-    subTasksDefault
-  ]
+  taskStatus: '',
+  logContents: '',
+  taskTypeName: '',
+  planBegin: '',
+  planEnd:'',
+  riskDegree: 0,
+  taskPeople: '',
+  isTop: false,
 }]

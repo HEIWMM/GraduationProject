@@ -1,7 +1,7 @@
 <template>
   <div class="main-content">
     <div class="table1">
-      <el-table :data="tableData" stripe style="width: 100%">
+      <el-table :data="taskData" stripe style="width: 100%">
         <el-table-column prop="taskName" label="任务"> </el-table-column>
         <el-table-column prop="importantDegree" label="重要度">
         </el-table-column>
@@ -26,15 +26,24 @@
     </el-row>
     <el-row type="flex" justify="start" class="table2">
       <el-col :span="15" style="display: flex">
-        <el-table :data="tableData" stripe style="width: 100%">
-          <el-table-column prop="taskName" label="日期"> </el-table-column>
-          <el-table-column prop="importantDegree" label="开始时间">
-          </el-table-column>
-          <el-table-column prop="emergencyDegree" label="结束时间">
-          </el-table-column>
-          <el-table-column prop="taskStatus" label="分钟数"></el-table-column>
-          <el-table-column prop="taskStatus" label="专注事项"></el-table-column>
-          <el-table-column prop="taskStatus" label="进展记录"></el-table-column>
+        <el-table
+          @row-dblclick="openSubtaskDetail"
+          :data="subTaskData"
+          stripe
+          style="width: 100%"
+        >
+          <el-table-column prop="date" label="日期"> </el-table-column>
+          <el-table-column prop="beginTime" label="开始时间"> </el-table-column>
+          <el-table-column prop="endTime" label="结束时间"> </el-table-column>
+          <el-table-column prop="minuteCount" label="分钟数"></el-table-column>
+          <el-table-column
+            prop="focusOnMatters"
+            label="专注事项"
+          ></el-table-column>
+          <el-table-column
+            prop="processRecord"
+            label="进展记录"
+          ></el-table-column>
         </el-table>
       </el-col>
       <el-col :span="8" :offset="1">
@@ -186,27 +195,21 @@
         <el-button type="primary" @click="addTask">确定</el-button>
       </div>
     </el-dialog>
+    <SubTaskDialog
+      :dialogFormVisible2="dialogFormVisible2"
+      :subTask="subTask"
+    />
   </div>
 </template>
 <script>
+import SubTaskDialog from "./SubTaskDialog";
 export default {
   name: "MainContent",
+  components: {
+    SubTaskDialog,
+  },
   data() {
     return {
-      tableData: [
-        {
-          taskName: "任务1",
-          importantDegree: "10",
-          emergencyDegree: "10",
-          taskStatus: "待处理",
-        },
-        {
-          taskName: "任务2",
-          importantDegree: "8",
-          emergencyDegree: "8",
-          taskStatus: "已完成",
-        },
-      ],
       typeOptions: [
         {
           value: "学习",
@@ -241,8 +244,17 @@ export default {
         { lable: "中风险", value: "中风险" },
         { lable: "低风险", value: "低风险" },
       ],
+      subTask: {
+        beginTime: "",
+        date: "",
+        endTime: "",
+        focusOnMatters: "",
+        minuteCount: "",
+        processRecord: "",
+      },
       clipboardValue: "",
       dialogFormVisible: false,
+      dialogFormVisible2: false,
       taskName: "", // 这一下就是表单需要提交的内容
       taskPeople: "",
       isTop: false,
@@ -256,12 +268,29 @@ export default {
       planEnd: "",
     };
   },
+  computed: {
+    subTaskData() {
+      console.log("subTasks", this.$store.state.subTasks);
+      let taskArray = this.$store.state.subTasks;
+      return taskArray.reverse();
+    },
+    taskData() {
+      return this.$store.state.tasks;
+    },
+  },
   methods: {
     selectBlur(e) {
       if (e.target.value) {
         console.log(e.target.value);
         this.taskType = e.target.value;
       }
+    },
+    openSubtaskDetail(row, column, e) {
+      console.log("双击", row, column, e);
+      this.subTask = {
+        ...row
+      }
+      console.log(this.subTask)
     },
     addTask() {
       this.dialogFormVisible = false; // 关闭弹窗
@@ -278,7 +307,7 @@ export default {
         planBegin: this.planBegin,
         planEnd: this.planEnd,
       };
-      this.tableData.push(task);
+      this.$store.commit("addTask", task);
       console.log("addTask", task);
     },
   },
