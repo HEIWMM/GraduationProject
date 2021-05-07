@@ -2,12 +2,12 @@
   <div class="main-content">
     <div class="table1">
       <el-table :data="tableData" stripe style="width: 100%">
-        <el-table-column prop="task" label="任务"> </el-table-column>
-        <el-table-column prop="ImportantDegree" label="重要度">
+        <el-table-column prop="taskName" label="任务"> </el-table-column>
+        <el-table-column prop="importantDegree" label="重要度">
         </el-table-column>
-        <el-table-column prop="EmergencyDegree" label="紧急度/倒计时">
+        <el-table-column prop="emergencyDegree" label="紧急度/倒计时">
         </el-table-column>
-        <el-table-column prop="status" label="状态"></el-table-column>
+        <el-table-column prop="taskStatus" label="状态"></el-table-column>
       </el-table>
     </div>
 
@@ -27,14 +27,14 @@
     <el-row type="flex" justify="start" class="table2">
       <el-col :span="15" style="display: flex">
         <el-table :data="tableData" stripe style="width: 100%">
-          <el-table-column prop="task" label="日期"> </el-table-column>
-          <el-table-column prop="ImportantDegree" label="开始时间">
+          <el-table-column prop="taskName" label="日期"> </el-table-column>
+          <el-table-column prop="importantDegree" label="开始时间">
           </el-table-column>
-          <el-table-column prop="EmergencyDegree" label="结束时间">
+          <el-table-column prop="emergencyDegree" label="结束时间">
           </el-table-column>
-          <el-table-column prop="status" label="分钟数"></el-table-column>
-          <el-table-column prop="status" label="专注事项"></el-table-column>
-          <el-table-column prop="status" label="进展记录"></el-table-column>
+          <el-table-column prop="taskStatus" label="分钟数"></el-table-column>
+          <el-table-column prop="taskStatus" label="专注事项"></el-table-column>
+          <el-table-column prop="taskStatus" label="进展记录"></el-table-column>
         </el-table>
       </el-col>
       <el-col :span="8" :offset="1">
@@ -42,7 +42,7 @@
           type="textarea"
           :rows="10"
           placeholder="请输入内容"
-          v-model="textarea"
+          v-model="clipboardValue"
           resize="none"
         >
         </el-input>
@@ -64,9 +64,9 @@
           <el-input v-model="taskPeople" placeholder="需求人"></el-input>
         </el-col>
         <el-col :span="5" :offset="2">
-          <el-select v-model="importantValue" placeholder="重要度">
+          <el-select v-model="importantDegree" placeholder="重要度">
             <el-option
-              v-for="item in options"
+              v-for="item in importantOptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -96,13 +96,13 @@
         </el-col>
         <el-col :span="4">
           <el-select
-            v-model="taskType"
+            v-model="taskTypeName"
             filterable
             placeholder="任务类别"
             @blur="selectBlur"
           >
             <el-option
-              v-for="item in options"
+              v-for="item in typeOptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -114,9 +114,9 @@
           <span>状态：</span>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="taskType" placeholder="状态" @blur="selectBlur">
+          <el-select v-model="taskStatus" placeholder="状态" @blur="selectBlur">
             <el-option
-              v-for="item in options"
+              v-for="item in statusOptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -128,9 +128,13 @@
           <span>紧急度：</span>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="taskType" placeholder="紧急度" @blur="selectBlur">
+          <el-select
+            v-model="emergencyDegree"
+            placeholder="紧急度"
+            @blur="selectBlur"
+          >
             <el-option
-              v-for="item in options"
+              v-for="item in emergencyOptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -144,7 +148,11 @@
           <span>计划开始时间：</span>
         </el-col>
         <el-col :span="4">
-          <el-date-picker v-model="planBegin" type="date" placeholder="选择日期">
+          <el-date-picker
+            v-model="planBegin"
+            type="date"
+            placeholder="选择日期"
+          >
           </el-date-picker>
         </el-col>
         <el-col :span="3" :offset="1">
@@ -158,9 +166,13 @@
           <span>当前风险度：</span>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="taskType" placeholder="风险度" @blur="selectBlur">
+          <el-select
+            v-model="riskDegree"
+            placeholder="风险度"
+            @blur="selectBlur"
+          >
             <el-option
-              v-for="item in options"
+              v-for="item in riskOptions"
               :key="item.value"
               :label="item.label"
               :value="item.value"
@@ -171,9 +183,7 @@
       </el-row>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false"
-          >确定</el-button
-        >
+        <el-button type="primary" @click="addTask">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -185,50 +195,65 @@ export default {
     return {
       tableData: [
         {
-          task: "任务1",
-          ImportantDegree: "10",
-          EmergencyDegree: "10",
-          status: "待处理",
+          taskName: "任务1",
+          importantDegree: "10",
+          emergencyDegree: "10",
+          taskStatus: "待处理",
         },
         {
-          task: "任务2",
-          ImportantDegree: "8",
-          EmergencyDegree: "8",
-          status: "已完成",
+          taskName: "任务2",
+          importantDegree: "8",
+          emergencyDegree: "8",
+          taskStatus: "已完成",
         },
-        {
-          task: "任务1",
-          ImportantDegree: "10",
-          EmergencyDegree: "10",
-          status: "待处理",
-        },
-        {
-          task: "任务2",
-          ImportantDegree: "8", 
-          EmergencyDegree: "8",
-          status: "已完成",
-        }
       ],
-      textarea: "",
+      typeOptions: [
+        {
+          value: "学习",
+          label: "学习",
+        },
+        {
+          value: "工作",
+          label: "工作",
+        },
+      ],
+      statusOptions: [
+        { lable: "待处理", value: "待处理" },
+        { lable: "已完成", value: "已完成" },
+        { lable: "删除", value: "删除" },
+      ],
+      emergencyOptions: [
+        { lable: "时间宽裕", value: "时间宽裕" },
+        { lable: "时间足够", value: "时间足够" },
+        { lable: "时间有限", value: "时间有限" },
+        { lable: "时间紧张", value: "时间紧张" },
+        { lable: "马上完成", value: "马上完成" },
+      ],
+      importantOptions: [
+        { lable: "意义很小", value: "意义很小" },
+        { lable: "意义较小", value: "意义较小" },
+        { lable: "意义一般", value: "意义一般" },
+        { lable: "意义重要", value: "意义重要" },
+        { lable: "极其重要", value: "极其重要" },
+      ],
+      riskOptions: [
+        { lable: "高风险", value: "高风险" },
+        { lable: "中风险", value: "中风险" },
+        { lable: "低风险", value: "低风险" },
+      ],
+      clipboardValue: "",
       dialogFormVisible: false,
-      taskName: "",
+      taskName: "", // 这一下就是表单需要提交的内容
       taskPeople: "",
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕",
-        },
-        {
-          value: "选项2",
-          label: "双皮奶",
-        },
-      ],
       isTop: false,
       logContents: "",
-      taskType: "",
-      importantValue: "",
-      planBegin:"",
-      planEnd:"",
+      taskTypeName: "",
+      importantDegree: "",
+      taskStatus: "",
+      emergencyDegree: "",
+      riskDegree: "",
+      planBegin: "",
+      planEnd: "",
     };
   },
   methods: {
@@ -237,6 +262,24 @@ export default {
         console.log(e.target.value);
         this.taskType = e.target.value;
       }
+    },
+    addTask() {
+      this.dialogFormVisible = false; // 关闭弹窗
+      let task = {
+        taskName: this.taskName,
+        taskPeople: this.taskPeople,
+        isTop: this.isTop,
+        logContents: this.logContents,
+        taskTypeName: this.taskTypeName,
+        importantDegree: this.importantDegree,
+        taskStatus: this.taskStatus,
+        emergencyDegree: this.emergencyDegree,
+        riskDegree: this.riskDegree,
+        planBegin: this.planBegin,
+        planEnd: this.planEnd,
+      };
+      this.tableData.push(task);
+      console.log("addTask", task);
     },
   },
 };
@@ -260,7 +303,7 @@ export default {
     height: 100%;
   }
   ::v-deep .el-dialog {
-    margin-top: 10vh!important;
+    margin-top: 10vh !important;
     width: 80%;
   }
   ::v-deep .el-input__inner,
