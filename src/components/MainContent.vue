@@ -1,7 +1,13 @@
 <template>
   <div class="main-content">
     <div class="table1">
-      <el-table :data="taskData" stripe style="width: 100%">
+      <el-table
+        :row-class-name="setRowIndex"
+        @row-dblclick="openTaskDetail"
+        :data="taskData"
+        stripe
+        style="width: 100%"
+      >
         <el-table-column prop="taskName" label="任务"> </el-table-column>
         <el-table-column prop="importantDegree" label="重要度">
         </el-table-column>
@@ -16,9 +22,7 @@
         <span>今日专注0次，0分钟，完成0个任务</span>
       </el-col>
       <el-col :span="6">
-        <el-button type="primary" @click="dialogFormVisible = true"
-          >加入一个任务</el-button
-        >
+        <el-button type="primary" @click="addOneTask">加入一个任务</el-button>
       </el-col>
       <el-col :span="6">
         <el-button type="primary">显示归档任务</el-button>
@@ -27,6 +31,7 @@
     <el-row type="flex" justify="start" class="table2">
       <el-col :span="15" style="display: flex">
         <el-table
+          :row-class-name="setRowIndex"
           @row-dblclick="openSubtaskDetail"
           :data="subTaskData"
           stripe
@@ -64,16 +69,16 @@
     >
       <el-row>
         <el-col :span="24">
-          <el-input v-model="taskName" placeholder="新任务"></el-input>
+          <el-input v-model="task.taskName" placeholder="新任务"></el-input>
         </el-col>
       </el-row>
       <el-row type="flex" align="middle">
         <el-col :span="3">任务日志</el-col>
         <el-col :span="5" :offset="3">
-          <el-input v-model="taskPeople" placeholder="需求人"></el-input>
+          <el-input v-model="task.taskPeople" placeholder="需求人"></el-input>
         </el-col>
         <el-col :span="5" :offset="2">
-          <el-select v-model="importantDegree" placeholder="重要度">
+          <el-select v-model="task.importantDegree" placeholder="重要度">
             <el-option
               v-for="item in importantOptions"
               :key="item.value"
@@ -84,7 +89,7 @@
           </el-select>
         </el-col>
         <el-col :span="3" :offset="3">
-          <el-checkbox v-model="isTop">置顶</el-checkbox>
+          <el-checkbox v-model="task.isTop">置顶</el-checkbox>
         </el-col>
       </el-row>
       <el-row>
@@ -93,7 +98,7 @@
             type="textarea"
             :rows="10"
             placeholder="请输入内容"
-            v-model="logContents"
+            v-model="task.logContents"
             resize="none"
           >
           </el-input>
@@ -105,7 +110,7 @@
         </el-col>
         <el-col :span="4">
           <el-select
-            v-model="taskTypeName"
+            v-model="task.taskTypeName"
             filterable
             placeholder="任务类别"
             @blur="selectBlur"
@@ -123,7 +128,11 @@
           <span>状态：</span>
         </el-col>
         <el-col :span="4">
-          <el-select v-model="taskStatus" placeholder="状态" @blur="selectBlur">
+          <el-select
+            v-model="task.taskStatus"
+            placeholder="状态"
+            @blur="selectBlur"
+          >
             <el-option
               v-for="item in statusOptions"
               :key="item.value"
@@ -138,7 +147,7 @@
         </el-col>
         <el-col :span="4">
           <el-select
-            v-model="emergencyDegree"
+            v-model="task.emergencyDegree"
             placeholder="紧急度"
             @blur="selectBlur"
           >
@@ -158,7 +167,7 @@
         </el-col>
         <el-col :span="4">
           <el-date-picker
-            v-model="planBegin"
+            v-model="task.planBegin"
             type="date"
             placeholder="选择日期"
           >
@@ -168,7 +177,11 @@
           <span>计划结束时间：</span>
         </el-col>
         <el-col :span="4">
-          <el-date-picker v-model="planEnd" type="date" placeholder="选择日期">
+          <el-date-picker
+            v-model="task.planEnd"
+            type="date"
+            placeholder="选择日期"
+          >
           </el-date-picker>
         </el-col>
         <el-col :span="3" :offset="1">
@@ -176,7 +189,7 @@
         </el-col>
         <el-col :span="4">
           <el-select
-            v-model="riskDegree"
+            v-model="task.riskDegree"
             placeholder="风险度"
             @blur="selectBlur"
           >
@@ -195,10 +208,7 @@
         <el-button type="primary" @click="addTask">确定</el-button>
       </div>
     </el-dialog>
-    <SubTaskDialog
-      :dialogFormVisible2="dialogFormVisible2"
-      :subTask="subTask"
-    />
+    <SubTaskDialog :subTask="subTask" :rowIndex="rowIndex" />
   </div>
 </template>
 <script>
@@ -255,27 +265,39 @@ export default {
       clipboardValue: "",
       dialogFormVisible: false,
       dialogFormVisible2: false,
-      taskName: "", // 这一下就是表单需要提交的内容
-      taskPeople: "",
-      isTop: false,
-      logContents: "",
-      taskTypeName: "",
-      importantDegree: "",
-      taskStatus: "",
-      emergencyDegree: "",
-      riskDegree: "",
-      planBegin: "",
-      planEnd: "",
+      task: {
+        taskName: "", // 这里以下就是表单需要提交的内容
+        taskPeople: "",
+        isTop: false,
+        logContents: "",
+        taskTypeName: "",
+        importantDegree: "",
+        taskStatus: "",
+        emergencyDegree: "",
+        riskDegree: "",
+        planBegin: "",
+        planEnd: "",
+      },
+      rowIndex: 0,
+      rowIndex2: 0, // 主任务的表格行数
+      isShowTask: false,
     };
   },
   computed: {
     subTaskData() {
-      console.log("subTasks", this.$store.state.subTasks);
-      let taskArray = this.$store.state.subTasks;
-      return taskArray.reverse();
+      return this.$store.state.subTasks;
     },
-    taskData() {
-      return this.$store.state.tasks;
+    taskData: {
+      get() {
+        return this.$store.state.tasks;
+      },
+    },
+  },
+  watch: {
+    dialogFormVisible(newVal) {
+      if (newVal === false) {
+        this.isShowTask === false;
+      }
     },
   },
   methods: {
@@ -287,28 +309,59 @@ export default {
     },
     openSubtaskDetail(row, column, e) {
       console.log("双击", row, column, e);
+      this.rowIndex = row.index; // 获取行数
       this.subTask = {
-        ...row
+        ...row,
+      };
+      console.log(this.dialogFormVisible2, this.subTask);
+      this.$children[4].dialogFormVisible = true; // 直接修改子组件的值，来控制是否显示子组件弹窗
+      this.$children[4].focusOnMatters = row.focusOnMatters;
+      this.$children[4].processRecord = row.processRecord;
+    },
+    openTaskDetail(row) {
+      this.dialogFormVisible = true; // 打开弹窗
+      this.rowIndex2 = row.index;
+      let task = {
+        ...this.$store.state.tasks[row.index],
+      };
+      for (let key in task) {
+        this.task[key] = task[key];
       }
-      console.log(this.subTask)
+      this.isShowTask = true;
+    },
+    setRowIndex({ row, rowIndex }) {
+      row.index = rowIndex;
     },
     addTask() {
+      if (this.isShowTask === true) {
+        console.log(this.task);
+        this.$store.commit("changeTaskVal", {
+          index: this.rowIndex2,
+          task: this.task,
+        });
+        this.dialogFormVisible = false;
+        return;
+      }
       this.dialogFormVisible = false; // 关闭弹窗
       let task = {
-        taskName: this.taskName,
-        taskPeople: this.taskPeople,
-        isTop: this.isTop,
-        logContents: this.logContents,
-        taskTypeName: this.taskTypeName,
-        importantDegree: this.importantDegree,
-        taskStatus: this.taskStatus,
-        emergencyDegree: this.emergencyDegree,
-        riskDegree: this.riskDegree,
-        planBegin: this.planBegin,
-        planEnd: this.planEnd,
+        ...this.task,
       };
       this.$store.commit("addTask", task);
       console.log("addTask", task);
+      this.resetContent(task);
+    },
+    addOneTask() {
+      this.resetContent(this.task);
+      this.dialogFormVisible = true;
+    },
+    resetContent(task) {
+      for (let key in task) {
+        if (typeof task[key] === "string" || typeof task[key] === "object") {
+          this.task[key] = "";
+        } else if (typeof task[key] === "number") {
+          this.task[key] = 0;
+        }
+      }
     },
   },
 };

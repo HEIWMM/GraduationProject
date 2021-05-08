@@ -8,7 +8,7 @@
       <el-col :span="3">开始时间</el-col>
       <el-col :span="8">
         <el-date-picker
-          v-model="beginTime"
+          v-model="$props.subTask.beginTime"
           type="datetime"
           placeholder="选择日期时间"
           disabled
@@ -18,7 +18,7 @@
       <el-col :span="3" :offset="1">结束时间</el-col>
       <el-col :span="9">
         <el-date-picker
-          v-model="endTime"
+          v-model="$props.subTask.endTime"
           type="datetime"
           placeholder="选择日期时间"
           disabled
@@ -51,7 +51,7 @@
       </el-col>
     </el-row>
     <div slot="footer" class="dialog-footer">
-      <el-button @click="$props.dialogFormVisible2 = false">取消</el-button>
+      <el-button @click="dialogFormVisible = false">取消</el-button>
       <el-button type="primary" @click="confirmTask">确认</el-button>
     </div>
   </el-dialog>
@@ -59,22 +59,39 @@
 <script>
 export default {
   name: "SubTaskDialog",
-  props: ["dialogFormVisible2", "subTask"],
+  props: ["subTask", "rowIndex"],
   data() {
     return {
       dialogFormVisible: false,
+      beginTime: "",
+      date: "",
+      endTime: "",
       focusOnMatters: "",
+      minuteCount: "",
       processRecord: "",
-      beginTime: new Date(),
-      endTime: new Date(),
     };
   },
-  mounted() {
-    console.log(this.$props);
-  },
+  computed: {},
+  mounted() {},
   methods: {
     confirmTask() {
       this.dialogFormVisible = false;
+      this.$store.commit("changeSubTaskVal", {
+        index: this.$props.rowIndex,
+        keyArr: [
+          {
+            keyVal: "processRecord",
+            Val: this.processRecord,
+          },
+          {
+            keyVal: "focusOnMatters",
+            Val: this.focusOnMatters,
+          },
+        ],
+      });
+      this.$nextTick(() => {
+        this.flag = true;
+      });
     },
   },
 };
