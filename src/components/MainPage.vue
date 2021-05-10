@@ -65,8 +65,8 @@
           >
           </el-date-picker
         ></el-col>
-        <el-col :span="6" :offset="1" v-show="isFocus && status === 1">
-          <el-button type="primary">多坚持5分钟</el-button>
+        <el-col :span="6" :offset="1" v-show="true && status === 1">
+          <el-button type="primary" @click="handOnFive">多坚持5分钟</el-button>
         </el-col>
         <el-col :span="3" :offset="1">{{ statusStr }}</el-col>
       </el-row>
@@ -99,6 +99,7 @@
 
 <script>
 import moment from "moment";
+import axios from 'axios'
 
 import MainContent from "./MainContent";
 import MainFooter from "./MainFooter";
@@ -260,6 +261,10 @@ export default {
       this.doTask(); // 开始专注任务
       this.changeStatus(); // 改变状态
     },
+    handOnFive() {
+      console.log('handon')
+      axios.get('/api/mon').then(res=>{console.log(res)})
+    }
   },
 };
 </script>
