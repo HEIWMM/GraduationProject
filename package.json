@@ -9,8 +9,10 @@
   },
   "main": "background.js",
   "dependencies": {
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "element-ui": "^2.15.1",
+    "express": "^4.17.1",
     "moment": "^2.29.1",
     "mongoose": "^5.12.7",
     "vue": "^2.6.11",

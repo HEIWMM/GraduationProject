@@ -1,38 +1,43 @@
 // connection.js file
-const {UserSchema}  = require('./schema')
-const mongoose = require('mongoose');
-const conn = mongoose.createConnection(
+const express = require('express')
+const { UserSchemaModel, saveData } = require('./conn')
+const app = express()
+const port = 3000
 
-  // 连接地址，MongoDB 的服务端口为27017
-  // dbtest是我要使用的数据库名，当往其中写数据时，MongoDB 会自动创建一个名为dbtest的数据库，不用事先手动创建。
-  'mongodb://dxwadmin:mongo_deng@148.70.235.23:27017/Graduaction?authSource=admin', 
-
-  // 一些兼容配置，必须加，你不写运行的时候会提示你加。
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-   }
-)
-
-// 通过connection和schema创建model
-let UserSchemaModel = conn.model('TaskManagement', UserSchema);
-
-
-// 通过实例化model创建文档
-let UserSchemaDoc = new UserSchemaModel({
-   name: 'zhangsan',
-   age: 20
+app.get('/', (req, res) => {
+  res.send('Hello World!')
 })
-
-// 将文档插入到数据库，save方法返回一个Promise对象。
-UserSchemaModel.find({}).then(doc => {
-  console.log(doc);
+app.get('/mon', (req, res) => {
+  let testData = {
+    subTasks: [
+      {
+        date: 'String',
+        beginTime: 'String',
+        endTime: 'String',
+        minuteCount: 0,
+        focusOnMatters: 'String',
+        processRecord: 'String',
+      },
+    ],
+    tasks: [
+      {
+        taskName: 'String',
+        importantDegree: 0,
+        emergencyDegree: 0,
+        taskStatus: 'String',
+        logContents: 'String',
+        taskTypeName: 'String',
+        planBegin: 'String',
+        planEnd: 'String',
+        riskDegree: 0,
+        taskPeople: 'String',
+        isTop: true,
+      },
+    ],
+  }
+  saveData(new UserSchemaModel(testData))
+  res.send('conn')
 })
-conn.on('open', () => {
-	console.log('打开 mongodb 连接');
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`)
 })
-conn.on('err', (err) => {
-	console.log('err:' + err);
-})
-
-module.exports = conn;

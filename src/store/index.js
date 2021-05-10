@@ -11,7 +11,7 @@ const store = new Vuex.Store({
   mutations: {
     addSubTask(state, subtask) {
       // console.log(state, subtask)
-      state.subTasks.splice(0,0,subtask)
+      state.subTasks.splice(0, 0, subtask)
     },
     addTask(state, task) {
       state.tasks.push(task)
@@ -21,12 +21,11 @@ const store = new Vuex.Store({
         state.subTasks[index][item.keyVal] = item.Val
       })
     },
-    changeTaskVal(state, {index, task}) {
+    changeTaskVal(state, { index, task }) {
       console.log(state.tasks, index, task)
-      for(let key in state.tasks[index]) {
+      for (let key in state.tasks[index]) {
         state.tasks[index][key] = task[key]
       }
-      
     },
   },
 })
