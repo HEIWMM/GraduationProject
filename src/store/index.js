@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { tasks, subTasks } from './store'
+import { addData } from '../data/opretions.js'
 Vue.use(Vuex)
 const store = new Vuex.Store({
   state: {
@@ -14,6 +15,7 @@ const store = new Vuex.Store({
       state.subTasks.splice(0, 0, subtask)
     },
     addTask(state, task) {
+      addData
       state.tasks.push(task)
     },
     changeSubTaskVal(state, { index, keyArr }) {

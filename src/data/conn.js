@@ -1,4 +1,3 @@
-
 const { UserSchema } = require('./schema')
 const mongoose = require('mongoose')
 const conn = mongoose.createConnection(
@@ -21,14 +20,20 @@ let UserSchemaModel = conn.model('TaskManagement', UserSchema)
 //   age: 20,
 // })
 // 保存数据
-function saveData(doc) {
-  doc
-    .save(function(err,res) {
-      if (err) {
-        console.log(err)
-      }
-      console.log(res)
-    })
+function saveData(data, fn) {
+  // let doc = new UserSchemaModel(data)
+  // console.log(data)
+  // doc.save(function(err,res) {
+  //     if (err) {
+  //       console.log(err)
+  //     }
+  //     console.log(res)
+  //   })
+
+  UserSchemaModel.findOne({ _id: '6098a15f8e005c2150a82b43' }).then((doc) => {
+    console.log(doc)
+    fn.send(doc)
+  })
 }
 // saveData(
 //   new UserSchemaModel({
@@ -72,7 +77,7 @@ function saveData(doc) {
 // UserSchemaModel.findOneAndUpdate(
 //   { _id: '60989c7d8a6db132c0a7423e' },
 //   {
-   
+
 //   },
 //   {
 //     new: true,
