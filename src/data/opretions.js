@@ -1,11 +1,35 @@
 import axios from 'axios'
-export const addData = (data) => {
-  axios.post('/save', data).them((res) => {
+function _axios(url,data) {
+  return axios({
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    method: 'post',
+    url: url,
+    data: data,
+  })
+}
+
+export const addTaskData = (data) => {
+  _axios('/api/addtasks',data).then((res) => {
     console.log('请求成功', res)
   })
 }
-export const updateDate = () => {
-  axios.post('/')
+
+export const addSubTaskData = (data) => {
+  _axios('/api/addsubtasks',data).then((res) => {
+    console.log('请求成功', res)
+  })
+}
+export const updateSubTaskData = (data) => {
+  _axios('/api/updatesubtasks',data).then((res) => {
+    console.log('请求成功', res)
+  })
+}
+export const updateTaskData = (data) => {
+  _axios('/api/updatetasks',data).then((res) => {
+    console.log('请求成功', res)
+  })
 }
 export const delData = () => {
   axios.post('/')

@@ -9,14 +9,14 @@ export const subTasks = [{
 }]
 export const tasks = [{
   taskName: '默认任务',
-  importantDegree: 0,
-  emergencyDegree: 0,
+  importantDegree: '',
+  emergencyDegree: '',
   taskStatus: '',
   logContents: '',
   taskTypeName: '',
   planBegin: '',
   planEnd:'',
-  riskDegree: 0,
+  riskDegree: '',
   taskPeople: '',
   isTop: false,
 }]

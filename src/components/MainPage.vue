@@ -99,7 +99,6 @@
 
 <script>
 import moment from "moment";
-import axios from 'axios'
 
 import MainContent from "./MainContent";
 import MainFooter from "./MainFooter";
@@ -262,9 +261,8 @@ export default {
       this.changeStatus(); // 改变状态
     },
     handOnFive() {
-      console.log('handon')
-      axios.get('/api/mon').then(res=>{console.log(res)})
-    }
+      console.log("handon");
+    },
   },
 };
 </script>

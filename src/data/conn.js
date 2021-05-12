@@ -1,4 +1,5 @@
 const { UserSchema } = require('./schema')
+var _ = require('lodash');
 const mongoose = require('mongoose')
 const conn = mongoose.createConnection(
   // 连接地址，MongoDB 的服务端口为27017
@@ -20,73 +21,68 @@ let UserSchemaModel = conn.model('TaskManagement', UserSchema)
 //   age: 20,
 // })
 // 保存数据
-function saveData(data, fn) {
-  // let doc = new UserSchemaModel(data)
-  // console.log(data)
-  // doc.save(function(err,res) {
-  //     if (err) {
-  //       console.log(err)
-  //     }
-  //     console.log(res)
-  //   })
+function saveData(data, type, fn) {
+  UserSchemaModel.findOne({ _id: '6098a15f8e005c2150a82b43' }).then((res) => {
+    // console.log(typeof res)
+    // console.log(res instanceof JSON)
+    console.log('新增的数据展示',data)
+    let obj = _.deepClone(res)
+    if (type === 'task') {
+      obj.tasks.push(data)
+    } else {
+      obj.subTasks.push(data)
+    }
 
-  UserSchemaModel.findOne({ _id: '6098a15f8e005c2150a82b43' }).then((doc) => {
-    console.log(doc)
-    fn.send(doc)
+    let doc = new UserSchemaModel(obj)
+    // console.log(data)
+    doc.save(function(err, res) {
+      if (err) {
+        // console.log('添加失败')
+        console.log(err)
+      }
+      console.log('添加成功')
+      //console.log(res)
+    })
+    // console.log(res)
+    fn.send(res)
   })
 }
-// saveData(
-//   new UserSchemaModel({
-//     name: 'lisi',
-//     age: 25,
-//   })
-// )
-// 操作方法
-// let testData = {
-//   subTasks: [
-//     {
-//       date: 'String',
-//       beginTime: 'String',
-//       endTime: 'String',
-//       minuteCount: 0,
-//       focusOnMatters: 'String',
-//       processRecord: 'String',
-//     },
-//   ],
-//   tasks: [
-//     {
-//       taskName: 'String',
-//       importantDegree: 0,
-//       emergencyDegree: 0,
-//       taskStatus: 'String',
-//       logContents: 'String',
-//       taskTypeName: 'String',
-//       planBegin: 'String',
-//       planEnd: 'String',
-//       riskDegree: 0,
-//       taskPeople: 'String',
-//       isTop: true,
-//     },
-//   ],
-// }
-// saveData(new UserSchemaModel(testData))
+function updateData(data, type, fn) {
+  UserSchemaModel.findOne({ _id: '6098a15f8e005c2150a82b43' }).then((res) => {
+    // console.log(typeof res)
+    // console.log(res instanceof JSON)
 
-// UserSchemaModel.find({}).then((doc) => {
-//   console.log(doc)
-// })
-// UserSchemaModel.findOneAndUpdate(
-//   { _id: '60989c7d8a6db132c0a7423e' },
-//   {
+    console.log(data)
+    let state = _.deepClone(res)
+    console.log('旧的', state)
+    if (type === 'task') {
+      let { index, task } = data
+      delete task.index
+      console.log('任务 ', task)
+      for (let key in state.tasks[index]) {
+        state.tasks[index][key] = task[key]
+      }
+    } else {
+      let { index, keyArr } = data
+      keyArr.map((item) => {
+        state.subTasks[index][item.keyVal] = item.Val
+      })
+    }
 
-//   },
-//   {
-//     new: true,
-//   },
-//   function(err, data) {
-//     console.log(err)
-//     console.log(data)
-//   }
-// )
+    let doc = new UserSchemaModel(state)
+    console.log('新的', state)
+    doc.save(function(err, res) {
+      if (err) {
+        // console.log('添加失败')
+        console.log(err)
+      }
+      console.log('添加成功')
+      //console.log(res)
+    })
+    // console.log(res)
+    fn.send(res)
+  })
+}
 conn.on('open', () => {
   console.log('打开 mongodb 连接')
 })
@@ -97,4 +93,5 @@ conn.on('err', (err) => {
 module.exports = {
   UserSchemaModel,
   saveData,
+  updateData,
 }

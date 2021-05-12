@@ -12,14 +12,14 @@ const UserSchema = new mongoose.Schema({
   }],
   tasks: [{
     taskName: String,
-    importantDegree: Number,
-    emergencyDegree: Number,
+    importantDegree: String,
+    emergencyDegree: String,
     taskStatus: String,
     logContents: String,
     taskTypeName: String,
     planBegin: String,
     planEnd:String,
-    riskDegree: Number,
+    riskDegree: String,
     taskPeople: String,
     isTop: Boolean,
   }]

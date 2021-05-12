@@ -346,8 +346,9 @@ export default {
       let task = {
         ...this.task,
       };
-      this.$store.commit("addTask", task);
       console.log("addTask", task);
+      this.$store.commit("addTask", task);
+      
       this.resetContent(task);
     },
     addOneTask() {
