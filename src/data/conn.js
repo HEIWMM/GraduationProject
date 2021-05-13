@@ -26,7 +26,7 @@ function saveData(data, type, fn) {
     // console.log(typeof res)
     // console.log(res instanceof JSON)
     console.log('新增的数据展示',data)
-    let obj = _.deepClone(res)
+    let obj = _.cloneDeep(res)
     if (type === 'task') {
       obj.tasks.push(data)
     } else {
@@ -53,13 +53,14 @@ function updateData(data, type, fn) {
     // console.log(res instanceof JSON)
 
     console.log(data)
-    let state = _.deepClone(res)
+    let state = _.cloneDeep(res)
     console.log('旧的', state)
     if (type === 'task') {
       let { index, task } = data
       delete task.index
       console.log('任务 ', task)
-      for (let key in state.tasks[index]) {
+      for (let key in task) { // 发现一个问题 就是mongoose 返回的对象不能够用来遍历
+        console.log('key--',key)
         state.tasks[index][key] = task[key]
       }
     } else {
