@@ -21,7 +21,7 @@
       <el-col :span="1">17</el-col>
       <el-col :span="1">18</el-col>
       <el-col :span="1">19</el-col>
-      <el-col :span="1">10</el-col>
+      <el-col :span="1">20</el-col>
       <el-col :span="1">21</el-col>
       <el-col :span="1">22</el-col>
       <el-col :span="1">23</el-col>
@@ -46,10 +46,20 @@
         position: 'absolute',
         zIndex: 9,
         height: '18px',
-        width: getTaskBlockStyle(item.beginTime, item.endTime, 'width'),
-        borderLeft: '3px solid red',
+        width: getTaskBlockStyle(
+          item.date,
+          item.beginTime,
+          item.endTime,
+          'width'
+        ),
+        backgroundColor: 'red',
         top: '18px',
-        left: getTaskBlockStyle(item.beginTime, item.endTime, 'left'),
+        left: getTaskBlockStyle(
+          item.date,
+          item.beginTime,
+          item.endTime,
+          'left'
+        ),
       }"
     ></div>
   </div>
@@ -81,20 +91,23 @@ export default {
       //console.log("偏移值", { val, hours, minutes });
       this.$refs.markTime.style.left = val + "%";
     },
-    getTimeWidth(time) {
-      let { hours, minutes } = moment(time).toObject();
+    getTimeWidth(date, time) {
+      console.log("time", time);
+      console.log("moment", moment("2021-5-13-20:56:09").toObject());
+      let { hours, minutes } = moment(date + "-" + time).toObject();
       let val = parseInt(((hours * 60 + minutes) / (24 * 60)) * 100);
       return val;
     },
-    getTaskBlockStyle(start, end, style) {
+    getTaskBlockStyle(date, start, end, style) {
       console.log({ start, end });
-      let left = this.getTimeWidth(start);
-      let width = this.getTimeWidth(end) - left;
+      let left = start === "" ? 0 : this.getTimeWidth(date, start);
+      let width = end === "" ? 0 : this.getTimeWidth(date, end) - left;
       console.log({ width, left });
+      console.log('终点', this.getTimeWidth(date, end))
       if (style === "left") {
         return left + "%";
       } else if (style === "width") {
-        return 20 + width + "%";
+        return width + "%";
       }
     },
   },
