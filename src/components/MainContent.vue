@@ -74,10 +74,18 @@
       </el-row>
       <el-row type="flex" align="middle">
         <el-col :span="3">任务日志</el-col>
-        <el-col :span="5" :offset="3">
-          <el-input v-model="task.taskPeople" placeholder="需求人"></el-input>
+        <el-col :span="5">
+          <el-switch
+            v-model="isEditLog"
+            active-text="预览"
+            inactive-text="编辑"
+          >
+          </el-switch>
         </el-col>
         <el-col :span="5" :offset="2">
+          <el-input v-model="task.taskPeople" placeholder="需求人"></el-input>
+        </el-col>
+        <el-col :span="5" :offset="1">
           <el-select v-model="task.importantDegree" placeholder="重要度">
             <el-option
               v-for="item in importantOptions"
@@ -88,20 +96,25 @@
             </el-option>
           </el-select>
         </el-col>
-        <el-col :span="3" :offset="3">
+        <el-col :span="3" :offset="1">
           <el-checkbox v-model="task.isTop">置顶</el-checkbox>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="24">
-          <el-input
+          <!-- <el-input
             type="textarea"
             :rows="10"
             placeholder="请输入内容"
             v-model="task.logContents"
             resize="none"
           >
-          </el-input>
+          </el-input> -->
+          <mavon-editor
+            :defaultOpen="isEditLog ? 'preview' : 'edit'"
+            v-model="task.logContents"
+            :toolbarsFlag="false"
+          />
         </el-col>
       </el-row>
       <el-row type="flex" align="middle">
@@ -281,6 +294,7 @@ export default {
       rowIndex: 0,
       rowIndex2: 0, // 主任务的表格行数
       isShowTask: false,
+      isEditLog: false,
     };
   },
   computed: {
@@ -346,9 +360,11 @@ export default {
       let task = {
         ...this.task,
       };
+      task.logContents.replace('\n','\\n')
+      console.log('日志内容','oooo\\npoo')
       console.log("addTask", task);
       this.$store.commit("addTask", task);
-      
+
       this.resetContent(task);
     },
     addOneTask() {

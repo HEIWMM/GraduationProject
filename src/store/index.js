@@ -1,9 +1,18 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import mavonEditor from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
+
 import { tasks, subTasks } from './store'
-import { addSubTaskData,addTaskData,updateSubTaskData,updateTaskData } from '../data/opretions.js'
+import {
+  addSubTaskData,
+  addTaskData,
+  updateSubTaskData,
+  updateTaskData,
+} from '../data/opretions.js'
 //import { addSubTaskData,addTaskData,updateSubTaskData } from '../data/opretions.js'
 Vue.use(Vuex)
+Vue.use(mavonEditor)
 const store = new Vuex.Store({
   state: {
     isFocus: false,
@@ -25,8 +34,8 @@ const store = new Vuex.Store({
         state.subTasks[index][item.keyVal] = item.Val
       })
       let obj = {
-        index, 
-        keyArr
+        index,
+        keyArr,
       }
       updateSubTaskData(obj)
     },
@@ -36,8 +45,8 @@ const store = new Vuex.Store({
         state.tasks[index][key] = task[key]
       }
       let obj = {
-        index, 
-        task
+        index,
+        task,
       }
       updateTaskData(obj)
     },
