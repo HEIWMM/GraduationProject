@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 // 创建schema
 const UserSchema = new mongoose.Schema({
+  name: String,
+  password: String,
   subTasks: [{
     date: String ,
     beginTime: String ,

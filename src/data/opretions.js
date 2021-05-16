@@ -31,6 +31,9 @@ export const updateTaskData = (data) => {
     console.log('请求成功', res)
   })
 }
+export const userRegister = (data) => {
+  return _axios('/api/register',data)
+}
 export const delData = () => {
   axios.post('/')
 }

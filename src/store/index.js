@@ -9,6 +9,7 @@ import {
   addTaskData,
   updateSubTaskData,
   updateTaskData,
+  userRegister,
 } from '../data/opretions.js'
 //import { addSubTaskData,addTaskData,updateSubTaskData } from '../data/opretions.js'
 Vue.use(Vuex)
@@ -16,6 +17,7 @@ Vue.use(mavonEditor)
 const store = new Vuex.Store({
   state: {
     isFocus: false,
+    name: '',
     tasks,
     subTasks,
   },
@@ -50,6 +52,11 @@ const store = new Vuex.Store({
       }
       updateTaskData(obj)
     },
+    registerSys(state, {name,password}) {
+      userRegister({name,password}).then(res=>{
+        console.log('注册成功',res)
+      })
+    }
   },
 })
 export default store

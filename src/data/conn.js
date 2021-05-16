@@ -1,5 +1,5 @@
 const { UserSchema } = require('./schema')
-var _ = require('lodash');
+var _ = require('lodash')
 const mongoose = require('mongoose')
 const conn = mongoose.createConnection(
   // 连接地址，MongoDB 的服务端口为27017
@@ -25,7 +25,7 @@ function saveData(data, type, fn) {
   UserSchemaModel.findOne({ _id: '6098a15f8e005c2150a82b43' }).then((res) => {
     // console.log(typeof res)
     // console.log(res instanceof JSON)
-    console.log('新增的数据展示',data)
+    console.log('新增的数据展示', data)
     let obj = _.cloneDeep(res)
     if (type === 'task') {
       obj.tasks.push(data)
@@ -47,6 +47,7 @@ function saveData(data, type, fn) {
     fn.send(res)
   })
 }
+// 更新数据
 function updateData(data, type, fn) {
   UserSchemaModel.findOne({ _id: '6098a15f8e005c2150a82b43' }).then((res) => {
     // console.log(typeof res)
@@ -59,8 +60,9 @@ function updateData(data, type, fn) {
       let { index, task } = data
       delete task.index
       console.log('任务 ', task)
-      for (let key in task) { // 发现一个问题 就是mongoose 返回的对象不能够用来遍历
-        console.log('key--',key)
+      for (let key in task) {
+        // 发现一个问题 就是mongoose 返回的对象不能够用来遍历
+        console.log('key--', key)
         state.tasks[index][key] = task[key]
       }
     } else {
@@ -84,6 +86,30 @@ function updateData(data, type, fn) {
     fn.send(res)
   })
 }
+// 注册
+function userRegister(name, password, fn) {
+  let doc = new UserSchemaModel({
+    name: name,
+    password: password,
+  })
+  UserSchemaModel.findOne({ name: name }).then((res) => {
+    console.log('查找', res)
+    if (res === null) {
+      doc.save((err, res) => {
+        if (err) {
+          console.log(err)
+        }
+        console.log('注册成功', res)
+        fn.send(res)
+      })
+    }
+    else {
+      fn.send('已存在相同用户名')
+    }
+  })
+}
+// 登录
+function userLogin(name, password) {}
 conn.on('open', () => {
   console.log('打开 mongodb 连接')
 })
@@ -95,4 +121,5 @@ module.exports = {
   UserSchemaModel,
   saveData,
   updateData,
+  userRegister,
 }

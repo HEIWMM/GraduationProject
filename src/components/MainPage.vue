@@ -123,11 +123,11 @@ export default {
       options: [
         {
           value: "选项1",
-          label: "黄金糕",
+          label: "学习",
         },
         {
           value: "选项2",
-          label: "双皮奶",
+          label: "工作",
         },
       ],
       typeValue: "",

@@ -1,16 +1,15 @@
 <template>
   <div id="app">
-    <MainPage />
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import MainPage from './components/MainPage.vue'
 
 export default {
   name: 'App',
   components: {
-    MainPage
+    // MainPage
   },
   mounted(){
     console.log(this.$store)
@@ -27,4 +26,5 @@ html,body {
 #app {
   height: 100%;
 }
+
 </style>
