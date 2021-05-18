@@ -10,8 +10,9 @@ import {
   updateSubTaskData,
   updateTaskData,
   userRegister,
+  userLogin,
 } from '../data/opretions.js'
-//import { addSubTaskData,addTaskData,updateSubTaskData } from '../data/opretions.js'
+import { setItem } from '../utils/storageTools'
 Vue.use(Vuex)
 Vue.use(mavonEditor)
 const store = new Vuex.Store({
@@ -22,6 +23,9 @@ const store = new Vuex.Store({
     subTasks,
   },
   mutations: {
+    initSys(state) {
+      console.log('初始化',state)
+    },
     addSubTask(state, subtask) {
       // console.log(state, subtask)
       state.subTasks.splice(0, 0, subtask)
@@ -52,11 +56,16 @@ const store = new Vuex.Store({
       }
       updateTaskData(obj)
     },
-    registerSys(state, {name,password}) {
-      userRegister({name,password}).then(res=>{
-        console.log('注册成功',res)
+    registerSys(state, { name, password }) {
+      userRegister({ name, password }).then((res) => {
+        console.log('注册成功', res)
       })
-    }
+    },
+    loginSys(state, { name, password }) {
+      state.name = name
+      setItem('name', name)
+      return userLogin({ name, password })
+    },
   },
 })
 export default store

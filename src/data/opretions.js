@@ -34,6 +34,9 @@ export const updateTaskData = (data) => {
 export const userRegister = (data) => {
   return _axios('/api/register',data)
 }
+export const userLogin = (data) => {
+  return _axios('/api/login',data)
+}
 export const delData = () => {
   axios.post('/')
 }

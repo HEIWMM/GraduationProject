@@ -102,14 +102,23 @@ function userRegister(name, password, fn) {
         console.log('注册成功', res)
         fn.send(res)
       })
-    }
-    else {
+    } else {
       fn.send('已存在相同用户名')
     }
   })
 }
 // 登录
-function userLogin(name, password) {}
+function userLogin(name, password, fn) {
+  UserSchemaModel.findOne({ name: name, password: password }).then((res) => {
+    if (res !== null && res.data !== "") {
+      console.log('登陆成功')
+      fn.send(res)
+    } else {
+      console.log('登录失败')
+      fn.send(res)
+    }
+  })
+}
 conn.on('open', () => {
   console.log('打开 mongodb 连接')
 })
@@ -122,4 +131,5 @@ module.exports = {
   saveData,
   updateData,
   userRegister,
+  userLogin,
 }
