@@ -12,7 +12,7 @@ import {
   userRegister,
   userLogin,
 } from '../data/opretions.js'
-import { setItem } from '../utils/storageTools'
+// import { setItem } from '../utils/storageTools'
 Vue.use(Vuex)
 Vue.use(mavonEditor)
 const store = new Vuex.Store({
@@ -63,7 +63,7 @@ const store = new Vuex.Store({
     },
     loginSys(state, { name, password }) {
       state.name = name
-      setItem('name', name)
+      this.commit('initSys')
       return userLogin({ name, password })
     },
   },

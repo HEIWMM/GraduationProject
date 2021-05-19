@@ -53,7 +53,7 @@
 </template>
 <script>
 import _$ from "jquery";
-import {  clearAllItem } from '../utils/storageTools'
+// import {  setItem, clearAllItem } from '../utils/storageTools'
 export default {
   name: "Login",
   mounted() {
@@ -176,19 +176,23 @@ export default {
   methods:{
     login(){
       console.log('点击登录---')
-      this.$store.commit('loginSys', {
+      console.log('store函数返回对象',this.$store.commit('loginSys', {
         name: this.l_username,
         password: this.l_password,
-      }).then((res) => {
-        if (res.data) {
-          console.log('登陆成功', res)
-          clearAllItem()
-          // setItem('name', name)
-          // console.log(state)
-        } else {
-          console.log('登录失败', res)
-        }
-      })
+      }))
+      // this.$store.commit('loginSys', {
+      //   name: this.l_username,
+      //   password: this.l_password,
+      // }).then((res) => {
+      //   if (res.data) {
+      //     console.log('登陆成功', res)
+      //     clearAllItem()
+      //     setItem('name', res.data.name)
+      //     console.log(res)
+      //   } else {
+      //     console.log('登录失败', res)
+      //   }
+      // })
     },
     register() {
       console.log('点击注册---')
