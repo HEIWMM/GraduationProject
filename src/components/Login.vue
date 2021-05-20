@@ -53,9 +53,14 @@
 </template>
 <script>
 import _$ from "jquery";
-// import {  setItem, clearAllItem } from '../utils/storageTools'
+import {  getItem, setItem, clearAllItem } from '../utils/storageTools'
 export default {
   name: "Login",
+  created(){
+    if(getItem('name')) {
+      this.$router.replace('/')
+    }
+  },
   mounted() {
     this.$nextTick(() => {
       _$(function () {
@@ -176,23 +181,20 @@ export default {
   methods:{
     login(){
       console.log('点击登录---')
-      console.log('store函数返回对象',this.$store.commit('loginSys', {
+      this.$store.dispatch('loginSys', {
         name: this.l_username,
         password: this.l_password,
-      }))
-      // this.$store.commit('loginSys', {
-      //   name: this.l_username,
-      //   password: this.l_password,
-      // }).then((res) => {
-      //   if (res.data) {
-      //     console.log('登陆成功', res)
-      //     clearAllItem()
-      //     setItem('name', res.data.name)
-      //     console.log(res)
-      //   } else {
-      //     console.log('登录失败', res)
-      //   }
-      // })
+      }).then((res)=>{
+        if (res.data === '') {
+          console.log('登录失败，检查用户名密码是否正确')
+          clearAllItem()
+          return
+        }
+        console.log('登陆成功返回对象', res)
+        clearAllItem()
+        setItem('name', res.data.name)
+        this.$router.replace('/')
+      })
     },
     register() {
       console.log('点击注册---')

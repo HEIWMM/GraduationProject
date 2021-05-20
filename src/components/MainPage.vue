@@ -102,12 +102,18 @@ import moment from "moment";
 
 import MainContent from "./MainContent";
 import MainFooter from "./MainFooter";
+import {getItem} from '../utils/storageTools'
 var timer1, timer2, timer3;
 export default {
   name: "MainPage",
   components: {
     MainContent,
     MainFooter,
+  },
+  created() {
+    if(!getItem('name')) {
+      this.$router.push('/login')
+    }
   },
   mounted() {
     console.log("testValue", this.$store.state.tasks[0].importantDegree);
@@ -122,11 +128,11 @@ export default {
       contentValue: "",
       options: [
         {
-          value: "选项1",
+          value: "study",
           label: "学习",
         },
         {
-          value: "选项2",
+          value: "work",
           label: "工作",
         },
       ],

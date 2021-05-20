@@ -11,7 +11,6 @@ const conn = mongoose.createConnection(
     useUnifiedTopology: true,
   }
 )
-
 // 通过connection和schema创建model
 let UserSchemaModel = conn.model('TaskManagement', UserSchema)
 
@@ -22,15 +21,15 @@ let UserSchemaModel = conn.model('TaskManagement', UserSchema)
 // })
 // 保存数据
 function saveData(data, type, fn) {
-  UserSchemaModel.findOne({ _id: '6098a15f8e005c2150a82b43' }).then((res) => {
-    // console.log(typeof res)
-    // console.log(res instanceof JSON)
-    console.log('新增的数据展示', data)
+  UserSchemaModel.findOne({ name: data.name }).then((res) => {
+    let taskData = _.cloneDeep(data)
+    delete taskData.name
+    console.log('新增的数据展示', taskData)
     let obj = _.cloneDeep(res)
     if (type === 'task') {
-      obj.tasks.push(data)
+      obj.tasks.push(taskData)
     } else {
-      obj.subTasks.push(data)
+      obj.subTasks.push(taskData)
     }
 
     let doc = new UserSchemaModel(obj)
@@ -49,10 +48,7 @@ function saveData(data, type, fn) {
 }
 // 更新数据
 function updateData(data, type, fn) {
-  UserSchemaModel.findOne({ _id: '6098a15f8e005c2150a82b43' }).then((res) => {
-    // console.log(typeof res)
-    // console.log(res instanceof JSON)
-
+  UserSchemaModel.findOne({ name: data.name }).then((res) => {
     console.log(data)
     let state = _.cloneDeep(res)
     console.log('旧的', state)
