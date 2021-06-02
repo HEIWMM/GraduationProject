@@ -11,6 +11,7 @@ import {
   updateTaskData,
   userRegister,
   userLogin,
+  getUserData,
 } from '../data/opretions.js'
 // import { setItem } from '../utils/storageTools'
 Vue.use(Vuex)
@@ -85,6 +86,19 @@ const store = new Vuex.Store({
         return res
       })
     },
+    getDataSys(context, { name }) {
+      return new Promise((resolve, reject)=>{
+        getUserData({ name }).then(res=>{
+          resolve(res)
+        }).catch(err=>reject(err))
+      }).then(res=>{
+        console.log('初始化返回数据', res)
+        if (res.data !== '') {
+          context.commit('initSys', res.data)
+        }
+        return res
+      })
+    }
   }
 })
 export default store

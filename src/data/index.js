@@ -1,6 +1,6 @@
 // connection.js file
 const express = require('express')
-const { saveData, updateData, userRegister, userLogin } = require('./conn')
+const { saveData, updateData, userRegister, userLogin, getUserData } = require('./conn')
 const app = express()
 const port = 3000
 const bodyParser = require('body-parser')
@@ -27,7 +27,7 @@ app.post('/addsubtasks', (req, res) => {
 })
 app.post('/updatetasks', (req, res) => {
   let obj = parseReq(req.body)
-  console.log(obj)
+  console.log(obj)   
   updateData(obj, 'task', res)
   // res.send(req.body)
 })
@@ -44,6 +44,10 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   let obj = parseReq(req.body)
   userLogin(obj.name, obj.password, res)
+})
+app.post('/getData', (req, res) => {
+  let obj = parseReq(req.body)
+  getUserData(obj.name, res)
 })
 app.post('/update', (req, res) => {
   saveData(req.body)

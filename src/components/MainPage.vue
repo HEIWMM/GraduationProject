@@ -102,7 +102,7 @@ import moment from "moment";
 
 import MainContent from "./MainContent";
 import MainFooter from "./MainFooter";
-import {getItem} from '../utils/storageTools'
+import { getItem } from "../utils/storageTools";
 var timer1, timer2, timer3;
 export default {
   name: "MainPage",
@@ -111,12 +111,19 @@ export default {
     MainFooter,
   },
   created() {
-    if(!getItem('name')) {
-      this.$router.push('/login')
+    if (!getItem("name")) {
+      this.$router.push("/login");
     }
   },
   mounted() {
     console.log("testValue", this.$store.state.tasks[0].importantDegree);
+    this.$store
+      .dispatch("getDataSys", {
+        name: getItem("name"),
+      })
+      .then((res) => {
+        console.log("初始化返回的数据", res);
+      });
   },
   data() {
     return {

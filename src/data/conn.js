@@ -115,6 +115,18 @@ function userLogin(name, password, fn) {
     }
   })
 }
+// 获取数据
+function getUserData(name, fn) {
+  UserSchemaModel.findOne({ name: name }).then((res) => {
+    if (res !== null && res.data !== "") {
+      console.log('获取数据成功')
+      fn.send(res)
+    } else {
+      console.log('获取数据失败')
+      fn.send(res)
+    }
+  })
+}
 conn.on('open', () => {
   console.log('打开 mongodb 连接')
 })
@@ -128,4 +140,5 @@ module.exports = {
   updateData,
   userRegister,
   userLogin,
+  getUserData,
 }

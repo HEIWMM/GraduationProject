@@ -40,6 +40,9 @@ export const userRegister = (data) => {
 export const userLogin = (data) => {
   return _axios('/api/login', data)
 }
+export const getUserData = (data) => {
+  return _axios('/api/getData', data)
+}
 export const delData = () => {
   axios.post('/')
 }

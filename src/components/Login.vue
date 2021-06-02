@@ -210,7 +210,7 @@ export default {
 .loginPage {
   height: 100%;
   width: 100%;
-  // background-image: url(https://z3.ax1x.com/2021/05/16/gghRBt.jpg);
+  background-image: url(https://z3.ax1x.com/2021/05/16/gghRBt.jpg);
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
