@@ -8,24 +8,47 @@
         stripe
         style="width: 100%"
       >
-        <el-table-column prop="taskName" label="任务"> </el-table-column>
+        <el-table-column prop="taskName" label="任务">
+          <template slot-scope="scope">
+            <i
+              style="color: #ff0033"
+              class="el-icon-star-on"
+              v-show="scope.row.isTop"
+            ></i>
+            {{ scope.row.taskName }}
+          </template>
+        </el-table-column>
         <el-table-column prop="importantDegree" label="重要度">
         </el-table-column>
         <el-table-column prop="emergencyDegree" label="紧急度/倒计时">
+          <template slot-scope="scope">
+            {{
+              `${scope.row.emergencyDegree}/${dealEmergencyStr(
+                scope.row.planEnd
+              )}`
+            }}
+          </template>
         </el-table-column>
         <el-table-column prop="taskStatus" label="状态"></el-table-column>
       </el-table>
     </div>
 
     <el-row type="flex" align="middle" justify="space-between">
-      <el-col :span="12">
-        <span>今日专注0次，0分钟，完成0个任务</span>
+      <el-col :span="8">
+        <span>{{
+          `今日专注${this.todayMsg.times}次，${this.todayMsg.timeCount}分钟，完成${this.todayMsg.numberOf}个任务`
+        }}</span>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="5">
         <el-button type="primary" @click="addOneTask">加入一个任务</el-button>
       </el-col>
-      <el-col :span="6">
-        <el-button type="primary">显示归档任务</el-button>
+      <el-col :span="5">
+        <el-button type="primary" @click="showStatistical">{{
+          tableType === "complet" ? "显示全部任务" : "显示归档任务"
+        }}</el-button>
+      </el-col>
+      <el-col :span="5">
+        <el-button type="primary" @click="cancellation">注销</el-button>
       </el-col>
     </el-row>
     <el-row type="flex" justify="start" class="table2">
@@ -151,6 +174,7 @@
               :key="item.value"
               :label="item.label"
               :value="item.value"
+              :disabled="item.disabled"
             >
             </el-option>
           </el-select>
@@ -221,13 +245,22 @@
         <el-button type="primary" @click="addTask">确定</el-button>
       </div>
     </el-dialog>
-    <SubTaskDialog :subTask="subTask" :rowIndex="rowIndex" />
+    <SubTaskDialog
+      @changeIsShow="changeIsShow"
+      :subTask="subTask"
+      :rowIndex="rowIndex"
+      :isShowSubTask="isShowSubTask"
+    />
   </div>
 </template>
 <script>
 import SubTaskDialog from "./SubTaskDialog";
+import { getItem, clearAllItem } from "../utils/storageTools";
+import moment from "moment";
+import _ from "lodash";
 export default {
   name: "MainContent",
+  props: ["typeValue"],
   components: {
     SubTaskDialog,
   },
@@ -246,7 +279,7 @@ export default {
       statusOptions: [
         { lable: "待处理", value: "待处理" },
         { lable: "已完成", value: "已完成" },
-        { lable: "删除", value: "删除" },
+        { lable: "删除", value: "删除", disabled: true },
       ],
       emergencyOptions: [
         { lable: "时间宽裕", value: "时间宽裕" },
@@ -275,6 +308,7 @@ export default {
         minuteCount: "",
         processRecord: "",
       },
+      isShowSubTask: false,
       clipboardValue: "",
       dialogFormVisible: false,
       dialogFormVisible2: false,
@@ -292,18 +326,72 @@ export default {
         planEnd: "",
       },
       rowIndex: 0,
-      rowIndex2: 0, // 主任务的表格行数
+      rowId: "", // 主任务的表格行数
       isShowTask: false,
       isEditLog: false,
+      todayMsg: {
+        times: 0,
+        timeCount: 0,
+        numberOf: 0,
+      },
+      tableType: "all",
     };
   },
   computed: {
     subTaskData() {
-      return this.$store.state.subTasks;
+      let arr = _.cloneDeep(this.$store.state.subTasks);
+      return arr.reverse();
     },
     taskData: {
+      // 写的太复杂了不太好
       get() {
-        return this.$store.state.tasks;
+        function sortByTop(arr) {
+          let objArr = [];
+          arr.map((item) => {
+            if (item.isTop === true) {
+              objArr.unshift(item);
+            } else {
+              objArr.push(item);
+            }
+          });
+          return objArr;
+        }
+        if (this.tableType === "complet") {
+          if (this.$props.typeValue === "学习") {
+            let arr = this.$store.state.tasks.filter((item) => {
+              return (
+                item.taskStatus === "已完成" && item.taskTypeName === "学习"
+              );
+            });
+            return sortByTop(arr);
+          } else if (this.$props.typeValue === "工作") {
+            let arr = this.$store.state.tasks.filter((item) => {
+              return (
+                item.taskStatus === "已完成" && item.taskTypeName === "工作"
+              );
+            });
+            return sortByTop(arr);
+          } else {
+            let arr = this.$store.state.tasks.filter((item) => {
+              return item.taskStatus === "已完成";
+            });
+            return sortByTop(arr);
+          }
+        } else {
+          if (this.$props.typeValue === "学习") {
+            let arr = this.$store.state.tasks.filter((item) => {
+              return item.taskTypeName === "学习";
+            });
+            return sortByTop(arr);
+          } else if (this.$props.typeValue === "工作") {
+            let arr = this.$store.state.tasks.filter((item) => {
+              return item.taskTypeName === "工作";
+            });
+            return sortByTop(arr);
+          } else {
+            return sortByTop(this.$store.state.tasks);
+          }
+        }
       },
     },
   },
@@ -311,10 +399,38 @@ export default {
     dialogFormVisible(newVal) {
       if (newVal === false) {
         this.isShowTask === false;
+        this.statusOptions[2].disabled = true;
       }
+    },
+    subTaskData(newVal) {
+      console.log("deng", newVal);
+      this.todayMsg.times = 0;
+      this.todayMsg.timeCount = 0;
+      this.todayMsg.numberOf = 0;
+      newVal.map((item) => {
+        if (item.date === moment().format("yyyy-M-D")) {
+          this.todayMsg.times += 1;
+          this.todayMsg.timeCount += item.minuteCount;
+          this.todayMsg.numberOf += 1;
+        }
+      });
     },
   },
   methods: {
+    dealEmergencyStr(date) {
+      let now = moment();
+      return moment(date).diff(now, "days");
+    },
+    cancellation() {
+      clearAllItem();
+      this.$router.replace("/login");
+    },
+    showStatistical() {
+      this.tableType = this.tableType === "complet" ? "all" : "complet";
+    },
+    changeIsShow() {
+      this.isShowSubTask = false;
+    },
     selectBlur(e) {
       if (e.target.value) {
         console.log(e.target.value);
@@ -331,26 +447,50 @@ export default {
       this.$children[4].dialogFormVisible = true; // 直接修改子组件的值，来控制是否显示子组件弹窗
       this.$children[4].focusOnMatters = row.focusOnMatters;
       this.$children[4].processRecord = row.processRecord;
+      this.isShowSubTask = true;
     },
     openTaskDetail(row) {
       this.dialogFormVisible = true; // 打开弹窗
-      this.rowIndex2 = row.index;
-      let task = {
-        ...this.$store.state.tasks[row.index],
-      };
-      for (let key in task) {
-        this.task[key] = task[key];
+      this.rowId = row._id;
+      console.log("双击", row);
+      let task = this.$store.state.tasks.filter((item) => {
+        return item._id === this.rowId;
+      });
+
+      for (let key in task[0]) {
+        this.task[key] = task[0][key];
       }
+      this.statusOptions[2].disabled = false;
       this.isShowTask = true;
     },
     setRowIndex({ row, rowIndex }) {
       row.index = rowIndex;
     },
     addTask() {
+      if (this.task.taskStatus === "删除") {
+        this.$store
+          .dispatch("delDataSys", {
+            id: this.rowId,
+            type: "task",
+          })
+          .then((res) => {
+            this.$store.commit("delTask", {
+              id: this.rowId,
+              type: "task",
+            });
+            console.log("删除成功", res);
+          });
+        this.dialogFormVisible = false;
+        return;
+      }
+      if(moment(this.task.planBegin).isAfter(this.task.planEnd)){
+         this.$message.error('日期有误,结束日期小于开始日期');
+         return
+      }
       if (this.isShowTask === true) {
         console.log(this.task);
         this.$store.commit("changeTaskVal", {
-          index: this.rowIndex2,
+          id: this.rowId,
           task: this.task,
         });
         this.dialogFormVisible = false;
@@ -360,11 +500,18 @@ export default {
       let task = {
         ...this.task,
       };
-      task.logContents.replace('\n','\\n')
-      console.log('日志内容','oooo\\npoo')
+      task.logContents.replace("\n", "\\n");
+      console.log("日志内容", "oooo\\npoo");
       console.log("addTask", task);
-      this.$store.commit("addTask", task);
-
+      this.$store.dispatch("addTaskSys", task).then(() => {
+        this.$store
+          .dispatch("getDataSys", {
+            name: getItem("name"),
+          })
+          .then((res) => {
+            console.log("添加后刷新返回的数据", res);
+          });
+      });
       this.resetContent(task);
     },
     addOneTask() {
@@ -412,9 +559,34 @@ export default {
 }
 
 .el-table {
-  overflow-y: scroll;
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 12px 5px -10px rgba(0, 0, 0, 0.1), 0 0 4px 0 rgba(0, 0, 0, 0.1);
   ::v-deep td {
     padding: 3px 0;
   }
+  ::v-deep .el-table__body tr:hover > td {
+    color: #fff;
+    background-color: #4b6cb1 !important;
+  }
+}
+.el-table::-webkit-scrollbar-track-piece {
+  //滚动条凹槽的颜色，还可以设置边框属性
+  background-color: #f1f1f1;
+}
+.el-table::-webkit-scrollbar {
+  //滚动条的宽度
+  width: 7px;
+  height: 10px;
+}
+.el-table::-webkit-scrollbar-thumb {
+  //滚动条的设置
+  background-color: #c1c1c1;
+  background-clip: padding-box;
+  min-height: 28px;
+  border-radius: 8px;
+}
+.el-table::-webkit-scrollbar-thumb:hover {
+  background-color: #a8a8a8;
 }
 </style>

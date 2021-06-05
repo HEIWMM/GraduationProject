@@ -52,7 +52,7 @@
           item.endTime,
           'width'
         ),
-        backgroundColor: 'red',
+        backgroundColor: '#FF0033',
         top: '18px',
         left: getTaskBlockStyle(
           item.date,
@@ -81,7 +81,9 @@ export default {
   },
   computed: {
     subTasks() {
-      return this.$store.state.subTasks;
+      return this.$store.state.subTasks.filter(item=>{
+        return item.date === moment().format('YYYY-M-D')
+      });
     },
   },
   methods: {
@@ -125,7 +127,7 @@ export default {
     z-index: 9;
     height: 36px;
     width: 0;
-    border-left: 3px solid red;
+    border-left: 3px solid #FF0033;
     top: 0;
     left: 50%;
   }

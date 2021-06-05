@@ -8,7 +8,7 @@
       <el-col :span="3">开始时间</el-col>
       <el-col :span="8">
         <el-date-picker
-          v-model="$props.subTask.beginTime"
+          v-model="beginTime"
           type="datetime"
           placeholder="选择日期时间"
           disabled
@@ -18,7 +18,7 @@
       <el-col :span="3" :offset="1">结束时间</el-col>
       <el-col :span="9">
         <el-date-picker
-          v-model="$props.subTask.endTime"
+          v-model="endTime"
           type="datetime"
           placeholder="选择日期时间"
           disabled
@@ -51,6 +51,7 @@
       </el-col>
     </el-row>
     <div slot="footer" class="dialog-footer">
+      <el-button v-show="isShowSubTask" @click="delSubtask">删除</el-button>
       <el-button @click="dialogFormVisible = false">取消</el-button>
       <el-button type="primary" @click="confirmTask">确认</el-button>
     </div>
@@ -59,21 +60,44 @@
 <script>
 export default {
   name: "SubTaskDialog",
-  props: ["subTask", "rowIndex"],
+  props: ["subTask", "rowIndex", "isShowSubTask"],
   data() {
     return {
       dialogFormVisible: false,
-      beginTime: "",
+      // beginTime: "",
       date: "",
-      endTime: "",
+      // endTime: "",
       focusOnMatters: "",
       minuteCount: "",
       processRecord: "",
     };
   },
-  computed: {},
+  computed: {
+    beginTime(){
+      return this.$props.subTask.date+'-'+this.$props.subTask.beginTime
+    },
+    endTime(){
+      return this.$props.subTask.date+'-'+this.$props.subTask.endTime
+    }
+  },
   mounted() {},
   methods: {
+    delSubtask() {
+      this.$store
+        .dispatch("delDataSys", {
+          index: this.$props.rowIndex,
+          type: "subtask",
+        })
+        .then((res) => {
+          this.$store.commit("delTask", {
+            index: this.$props.rowIndex,
+            type: "subtask",
+          });
+          this.$emit("changeIsShow");
+          this.dialogFormVisible = false;
+          console.log("删除成功", res);
+        });
+    },
     confirmTask() {
       this.dialogFormVisible = false;
       this.$store.commit("changeSubTaskVal", {

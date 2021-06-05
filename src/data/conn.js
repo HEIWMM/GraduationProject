@@ -53,14 +53,25 @@ function updateData(data, type, fn) {
     let state = _.cloneDeep(res)
     console.log('旧的', state)
     if (type === 'task') {
-      let { index, task } = data
+      let { id, task } = data
       delete task.index
-      console.log('任务 ', task)
-      for (let key in task) {
-        // 发现一个问题 就是mongoose 返回的对象不能够用来遍历
-        console.log('key--', key)
-        state.tasks[index][key] = task[key]
-      }
+      state.tasks = state.tasks.map((item) => {
+        if (String(item._id) === id) {
+          for (let key in task) {
+            if (key === 'index' || key === '_id') {
+              continue
+            }
+            item[key] = task[key]
+          }
+        }
+        return item
+      })
+      console.log('任务 ', task, state.tasks)
+      // for (let key in task) {
+      //   // 发现一个问题 就是mongoose 返回的对象不能够用来遍历
+      //   console.log('key--', key)
+      //   state.tasks[index][key] = task[key]
+      // }
     } else {
       let { index, keyArr } = data
       keyArr.map((item) => {
@@ -70,6 +81,39 @@ function updateData(data, type, fn) {
 
     let doc = new UserSchemaModel(state)
     console.log('新的', state)
+    doc.save(function(err, res) {
+      if (err) {
+        // console.log('添加失败')
+        console.log(err)
+      }
+      console.log('添加成功')
+      //console.log(res)
+    })
+    // console.log(res)
+    fn.send(res)
+  })
+}
+// 删除数据
+function deleteData(data, type, fn) {
+  UserSchemaModel.findOne({ name: data.name }).then((res) => {
+    console.log(data)
+    let state = _.cloneDeep(res)
+    if (type === 'task') {
+      let { id } = data
+      console.log('传过来的id', id)
+      state.tasks = state.tasks.filter((item) => {
+        console.log(String(item._id) + '---' + id)
+        console.log('判断', String(item._id) !== id)
+        return String(item._id) !== id
+      })
+    } else {
+      let { index } = data
+      console.log('indexNumber', state.subTasks.length - 1 - index)
+      state.subTasks.splice(Math.abs(state.subTasks.length - 1 - index), 1)
+    }
+    console.log('删除成功')
+    console.log('新的', state.tasks)
+    let doc = new UserSchemaModel(state)
     doc.save(function(err, res) {
       if (err) {
         // console.log('添加失败')
@@ -106,7 +150,7 @@ function userRegister(name, password, fn) {
 // 登录
 function userLogin(name, password, fn) {
   UserSchemaModel.findOne({ name: name, password: password }).then((res) => {
-    if (res !== null && res.data !== "") {
+    if (res !== null && res.data !== '') {
       console.log('登陆成功')
       fn.send(res)
     } else {
@@ -118,7 +162,7 @@ function userLogin(name, password, fn) {
 // 获取数据
 function getUserData(name, fn) {
   UserSchemaModel.findOne({ name: name }).then((res) => {
-    if (res !== null && res.data !== "") {
+    if (res !== null && res.data !== '') {
       console.log('获取数据成功')
       fn.send(res)
     } else {
@@ -141,4 +185,5 @@ module.exports = {
   userRegister,
   userLogin,
   getUserData,
+  deleteData,
 }

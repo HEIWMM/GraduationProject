@@ -19,8 +19,8 @@
       <el-input-number
         v-model="timeCount"
         @change="handleChange"
-        :min="0"
-        :max="50"
+        :min="1"
+        :max="120"
         label="描述文字"
       ></el-input-number>
       <el-button
@@ -44,7 +44,7 @@
       >
     </el-header>
     <el-main>
-      <MainContent />
+      <MainContent :typeValue="typeValue" />
     </el-main>
     <el-footer height="36px">
       <MainFooter />
@@ -66,7 +66,7 @@
           </el-date-picker
         ></el-col>
         <el-col :span="6" :offset="1" v-show="true && status === 1">
-          <el-button type="primary" @click="handOnFive">多坚持5分钟</el-button>
+          <!-- <el-button type="primary" @click="handOnFive">多坚持5分钟</el-button> -->
         </el-col>
         <el-col :span="3" :offset="1">{{ statusStr }}</el-col>
       </el-row>
@@ -94,6 +94,7 @@
         <el-button type="primary" @click="confirmTask">{{ btnStr }}</el-button>
       </div>
     </el-dialog>
+    <audio ref="audioPlay" style="display: none" src="../assets/success.wav" />
   </el-container>
 </template>
 
@@ -103,6 +104,7 @@ import moment from "moment";
 import MainContent from "./MainContent";
 import MainFooter from "./MainFooter";
 import { getItem } from "../utils/storageTools";
+import isElectron from "is-electron";
 var timer1, timer2, timer3;
 export default {
   name: "MainPage",
@@ -116,7 +118,6 @@ export default {
     }
   },
   mounted() {
-    console.log("testValue", this.$store.state.tasks[0].importantDegree);
     this.$store
       .dispatch("getDataSys", {
         name: getItem("name"),
@@ -135,16 +136,20 @@ export default {
       contentValue: "",
       options: [
         {
-          value: "study",
+          value: "学习",
           label: "学习",
         },
         {
-          value: "work",
+          value: "工作",
           label: "工作",
         },
+        {
+          value: "全部",
+          label: "全部",
+        },
       ],
-      typeValue: "",
-      timeCount: 10,
+      typeValue: "全部",
+      timeCount: 25,
       dialogFormVisible: false,
       pickBeginTime: moment(),
       taskType: "reverse",
@@ -152,9 +157,28 @@ export default {
       processTime: "",
     };
   },
+  watch: {
+    endTime(newVal) {
+      console.log('deng结束时间', newVal)
+    },
+    statusStr(newVal) {
+      if (newVal === "休息中") {
+        this.$refs.audioPlay.play();
+        if (isElectron()) {
+          console.log(this.$electron)
+          this.$electron.remote.dialog.showMessageBox({
+            type: "info",
+            message: "专注完成",
+            title: "完成",
+            buttons: ["ok"],
+          });
+        }
+      }
+    },
+  },
   methods: {
-    addSubTask() {
-      this.endTime = moment();
+    addSubTask(endTime) {
+      this.endTime = endTime;
       this.processTime = this.endTime.diff(this.pickBeginTime, "seconds");
       let subTask = {
         date: this.pickBeginTime.format("YYYY-M-D"),
@@ -206,15 +230,16 @@ export default {
     },
     doTask() {
       if (this.taskType === "positive") {
-        console.log("当前状态", this.status);
+        console.log("当前状态", this.status, this.statusStr, this.statusStr);
         console.log("正向计时");
         if (this.status === 1) {
+          console.log('deng', this.status)
           let endTime = moment();
           let processTime = endTime.diff(this.pickBeginTime, "seconds");
           timer3 = setTimeout(() => {
             console.log("开始正向计时的休息时间");
             this.$nextTick(() => {
-              this.addSubTask();
+              this.addSubTask(endTime);
               console.log("正向任务结束--经历的时间：", this.processTime);
               this.changeStatus();
             });
@@ -222,7 +247,7 @@ export default {
         }
         if (this.status === 2) {
           clearTimeout(timer3);
-          this.addSubTask();
+          this.addSubTask(moment());
           console.log("正向任务结束--经历的时间：", this.processTime);
         }
         return;
@@ -233,11 +258,12 @@ export default {
           console.log("创建反向记时器");
           timer1 = setTimeout(() => {
             this.$nextTick(() => {
+              let endTime = moment()
               this.changeStatus();
               timer2 = setTimeout(() => {
                 this.$nextTick(() => {
                   console.log("反向任务结束--经历的时间：", this.processTime);
-                  this.addSubTask();
+                  this.addSubTask(endTime);
                   this.changeStatus();
                 });
               }, (this.timeCount / 5) * 60 * 1000); // 休息时间
@@ -251,7 +277,7 @@ export default {
             timer3 = setTimeout(() => {
               console.log("开始反向计时的休息时间");
               this.$nextTick(() => {
-                this.addSubTask();
+                this.addSubTask(endTime);
                 console.log("反向任务结束--经历的时间：", this.processTime);
                 this.changeStatus();
               });
@@ -259,7 +285,7 @@ export default {
           }
           if (this.status === 2) {
             clearTimeout(timer3);
-            this.addSubTask();
+            this.addSubTask(moment());
             console.log("反向任务结束--经历的时间：", this.processTime);
           }
           clearTimeout(timer1);
